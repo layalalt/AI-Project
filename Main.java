@@ -178,19 +178,21 @@ public class Main
            
          
         long startTime = System.currentTimeMillis(), endTime = 1000000; //to prevent infinite loops
-        boolean infiniteLoop = false;  
+        boolean infiniteLoop = false; //infinite loops caused my a bad grid generation 
+        int counter = 1;
            
         for(int i=0; i<3; i++) 
         {
           for(int j=0; j<10; j++)
           {
+                infiniteLoop = false;
                 endTime = System.currentTimeMillis();
                 
-                if((endTime - startTime)/1000.0 > 2)
+                if((endTime - startTime)/1000.0 > counter) //loop took more that a second; stuck
                 {    
-                    infiniteLoop = true;
+                    infiniteLoop = true;  
+                    counter++;
                     break;
-                
                 }
                 
                 int num = random.nextInt(10);
@@ -200,7 +202,7 @@ public class Main
                  if(num == grid[i][k])
                    exists = true;
                 }
-                if(i == 1) //second row
+                if(i == 1) //second row diagnoal checker
                 {
                   if(j == 0)
                   {
@@ -214,11 +216,11 @@ public class Main
                   }
                   else if (j>0 && j<9)
                   {  
-                   if((num == grid[0][j - 1]) || (num == grid[0][j]) || (num == grid[0][j + 1]))
+                   if((num == grid[0][j - 1]) || (num == grid[0][j]) || (num == grid[0][j + 1])) //middle elements
                      exists = true; 
                   }     
                 }      
-                else if(i == 2) 
+                else if(i == 2) //third row
                 {
                  if(j == 0)
                  {
@@ -230,42 +232,30 @@ public class Main
                    if((num == grid[1][8]) || (num == grid[1][9])) //last element  
                      exists = true;
                  }
-                  else if (j>0 && j<9)
+                  else if (j>0 && j<9) //middle elements
                   {  
                    if((num == grid[1][j - 1]) || (num == grid[1][j]) || (num == grid[1][j + 1]))
                      exists = true; 
                   }  
                 } 
-                if(exists)
+                if(exists) //violates constraints
                   j--;
                 else
-                  grid[i][j] = num;
+                  grid[i][j] = num; //assign to grid
           }
-          if((endTime - startTime)/1000.0 > 5)
-                    break;
+          if(infiniteLoop) //restart
+             i=0;
         }
         
-           for(int i=0; i<10; i++) 
-           {    
-               grid[3][i] = grid[0][i] + grid[1][i] + grid[2][i];
-               if(infiniteLoop)
-               {
-                 if(grid[1][i] == -1)
-                     grid[3][i] = grid[0][i];
-                 else if(grid[2][i] == -1)
-                    grid[3][i] = grid[0][i] + grid[1][i];
-                 else
-                     grid[3][i] = grid[0][i] + grid[1][i] + grid[2][i];            
-               }
-           }
+           for(int i=0; i<10; i++) //sum generator
+              grid[3][i] = grid[0][i] + grid[1][i] + grid[2][i];
+          
         
         for(int i=0; i<3; i++) 
         {
           for(int j=0; j<10; j++)
           {
-             boolean result = random.nextDouble() < 0.5; //generates probability
-             if(infiniteLoop)
-                result = random.nextDouble() < 0.7; 
+             boolean result = random.nextDouble() < 0.55; //generates probability to make a cell empty
              if(result) //fill grid index
                 grid[i][j] = -1;
           }
@@ -276,7 +266,7 @@ public class Main
        
         for(int i=0; i<3; i++)
         {
-            for(int j=0; j<9; j++) 
+            for(int j=0; j<10; j++) 
             {
                if(grid[i][j] == -1)
                  System.out.print(grid[i][j] + "| ");
@@ -285,8 +275,8 @@ public class Main
             }
             System.out.println();
         }
-        System.out.println("-----------------------------------");
-        for(int i=0; i<9; i++) 
+        System.out.println("---------------------------------------");
+        for(int i=0; i<10; i++) 
         {
            if(grid[3][i] > 9)
               System.out.print(grid[3][i] + "| ");
@@ -298,3 +288,4 @@ public class Main
     }
 
 }
+
