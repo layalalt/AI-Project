@@ -205,6 +205,119 @@ public class Main
         System.out.println();
     }
 
+     public static void forwardChecking(Grid[][] grid)
+    {
+        boolean failed = false;
+        for(int j=0; j<10; j++) //removes the sum and all bigger numbers from the domains of its column 
+        {
+            for(int i=0; i<3; i++)
+            {
+                grid[i][j].removeFromDomain(grid[3][j].getAssignment());
+                grid[i][j].removeFromDomainGreaterThan(grid[3][j].getAssignment());
+            }
+
+        }
+        for (int i=0; i<3; i++) 
+        {
+            for (int j=0; j<10; j++) 
+            {
+                if(grid[i][j].getAssignment()==-1) //if not assigned
+                    grid[i][j].setAssignment(grid[i][j].selectRandomFromDomain()); //assigns randomly from domain
+              
+                int current = grid[i][j].getAssignment();
+                if(j<9)
+                {
+                    for (int k = 9; k > j+1; k--) //removes assignment from its row's domains
+                    {
+                        grid[i][k].removeFromDomain(current);
+                        if(grid[i][k].domainIsEmpty())
+                        {
+                         grid[i][j].removeFromDomain(current);
+                         grid[i][k].addToDomain(current);
+                         failed = true;
+                         break;
+                        }
+                    }
+                    if(failed)
+                    {
+                        j--;
+                        continue;
+                    }
+
+                    if(i<2) //removes assignment from adjacent cells' domain for rows 1 and 2
+                    {
+                        grid[i][j+1].removeFromDomain(current);
+                        if(grid[i][j+1].domainIsEmpty())//forward checking
+                        {
+                         grid[i][j].removeFromDomain(current);
+                         grid[i][j+1].addToDomain(current);
+                         failed = true;
+                         j--;
+                         continue;
+                        }
+
+                     /* if (grid[i][j+1].getAssignment()==-1) 
+                            grid[i][j+1].removeFromDomain(current); ? */
+                        grid[i+1][j].removeFromDomain(current);
+                        if(grid[i+1][j].domainIsEmpty())
+                        {
+                         grid[i][j].removeFromDomain(current);
+                         grid[i+1][j].addToDomain(current);
+                         failed = true;
+                         j--;
+                         continue;
+                        }
+                        grid[i+1][j+1].removeFromDomain(current);
+                         if(grid[i+1][j+1].domainIsEmpty())
+                        {
+                         grid[i][j].removeFromDomain(current);
+                         grid[i+1][j+1].addToDomain(current);
+                         failed = true;
+                         j--;
+                         continue;
+                        }
+
+                    }
+                    else if(i==2) //removes assignment from adjacent cells' domain for row 3
+                    {
+                        grid[i][j+1].removeFromDomain(current);
+                         if(grid[i][j+1].domainIsEmpty())
+                        {
+                         grid[i][j].removeFromDomain(current);
+                         grid[i][j+1].addToDomain(current);
+                         failed = true;
+                         j--;
+                         continue;
+                        }
+
+                    }
+                }
+                else if(j==9 && i<2)
+                    grid[i+1][j].removeFromDomain(current);
+                    if(grid[i+1][j].domainIsEmpty())
+                    {
+                     grid[i][j].removeFromDomain(current);
+                     grid[i+1][j].addToDomain(current);
+                     failed = true;
+                     j--;
+                     continue;
+                    }
+
+            }// end for loop j
+        }//end for loop i
+
+    }//end forward checking
+
+    /*public static void forwardCheck(Grid cell, Grid nextCell, int num)
+    {
+        if(nextCell.domainIsEmpty())
+        {
+         cell.removeFromDomain(num);
+         nextCell.addToDomain(num);
+        }
+
+    }*/
+
 }
 
 
