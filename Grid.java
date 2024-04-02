@@ -1,3 +1,4 @@
+import java.util.*;
 
 public class Grid
 {
@@ -53,6 +54,36 @@ public class Grid
     {
         for(int i=0; i<10; i++)
             System.out.print(domain[i] + "|");
+    }
+    
+    public int selectRandomFromDomain()
+    {
+        Random random = new Random();
+        return domain[random.nextInt(domain.length)]; //returns a random number form domain using a random index
+
+    }
+
+    public boolean domainIsEmpty()
+    {
+        boolean empty = false;
+        for (int i=0; i<domain.length; i++) 
+        {
+            if (domain[i]!=-1) 
+                return false;
+        }
+        return true;
+    }
+
+    public void addToDomain(int num)
+    {
+        for (int i=0; i<domain.length; i++) 
+        {
+            if (domain[i]=-1)
+            {
+                domain[i]=num;
+                break;
+            }
+        }
     }
     
 }
