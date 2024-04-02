@@ -5,178 +5,32 @@ public class Main
 
     public static void main(String[] args) 
     {
-       /** int[][] grid = new int[4][10]; //10 by 4
+       
+        Grid[][] tenner = generateTenner();//10 by 4
+
+        displayTenner(tenner);
+        
+        /**for(int i=0; i<3; i++) //for testing purposes
+          for(int j=0; j<10; j++)
+          { 
+            tenner[i][j].displayDomain();
+            System.out.println();
+          }*/
+
+    }
+    
+    
+    
+    
+    public static Grid[][] generateTenner()
+    {
+        Grid[][] tenner = new Grid[4][10]; //10 by 4
+        for(int i=0; i<4; i++) 
+          for(int j=0; j<10; j++)
+             tenner[i][j] = new Grid();
+        
         Random random = new Random();
 
-        for(int i=0; i<10; i++) //fills up last row
-        {
-           int num = random.nextInt((20 - 7) + 1) + 7; //random number between 7 and 20 
-           boolean exists = false;
-           for(int j=i; j>=0 ;j--) //checks if it exists already; ensures uniqueness
-           {
-             if(num == grid[3][j])
-                exists = true;
-           }
-           if(exists)
-               i--;
-           else
-               grid[3][i] = num;
-        }
-        
-        for(int i=0; i<3; i++) //initializer
-            for(int j=0; j<10; j++) 
-                grid[i][j] = -1;
-        
-        for(int i=0; i<3; i++) 
-        {
-          for(int j=0; j<10; j++)
-          {
-             boolean result = random.nextDouble() < 0.7; //generates probability
-             if(result) //fill grid index
-             {
-                int num = random.nextInt(10);
-                while(num > grid[3][j])
-                    num = random.nextInt(10);
-                boolean exists = false;
-                for(int k=j; k>=0; k--) //checks if it exists already; ensures uniqueness
-                {
-                 if(num == grid[i][k])
-                   exists = true;
-                }
-                if(exists)
-                  j--;
-                else
-                  grid[i][j] = num;
-             }
-          }
-        }
-        
-        
-        for(int i=1; i<3; i++) //adjacent cells checker
-        {
-          for(int j=0; j<10; j++)
-          {
-            boolean checker = false;
-            if(i == 1) //second row
-            {
-               if(j == 0)
-               {
-                 if((grid[1][0] == grid[0][0]) || (grid[1][0] == grid[0][1])) //first element
-                    checker = true;
-                 else
-                     continue;
-               }
-               else if(j == 9)
-               {  
-                 if((grid[1][9] == grid[0][8]) || (grid[1][9] == grid[0][9])) //last element  
-                    checker = true;
-                 else
-                     continue;
-               }
-               else 
-               {
-                 if((grid[1][j] == grid[0][j - 1]) || (grid[1][j] == grid[0][j]) || (grid[1][j] == grid[0][j + 1]))
-                    checker = true; 
-                 else
-                     continue;
-               } 
-            }      
-            else //(i == 2) 
-            {
-               if(j == 0)
-               {
-                 if((grid[2][0] == grid[1][0]) || (grid[2][0] == grid[1][1])) //first element
-                    checker = true;
-                 else
-                     continue;
-               }
-               else if(j == 9)
-               {  
-                 if((grid[2][9] == grid[1][8]) || (grid[2][9] == grid[1][9])) //last element  
-                    checker = true;
-                 else
-                     continue;
-               }
-               else 
-               {
-                 if((grid[2][j] == grid[1][j - 1]) || (grid[2][j] == grid[1][j]) || (grid[2][j] == grid[1][j + 1]))
-                    checker = true; 
-                 else
-                     continue;
-               } 
-             }          
-              if(checker)
-                grid[i][j] = -1;    
-          }
-        } 
-        
-        for(int i=0; i<10; i++) //sum checker
-        {
-          if(grid[0][i] != -1 && grid[1][i] != -1 && grid[2][i] != -1)
-          {
-              if(grid[0][i] + grid[1][i] + grid[2][i] == grid[3][i])
-                  continue;
-              else
-              {
-                double change = random.nextDouble();
-                if(change < 0.33333)
-                    grid[0][i] = -1;
-                else if(change < 0.66667)
-                    grid[1][i] = -1;
-                else
-                    grid[2][i] = -1;
-              }
-          }
-          else if(grid[0][i] != -1 && grid[1][i] != -1)
-          {
-             if(grid[0][i] + grid[1][i] < grid[3][i])
-                continue;
-             else
-             {
-                boolean change = random.nextDouble() < 0.5;
-                if(change)
-                    grid[0][i] = -1;
-                else 
-                    grid[1][i] = -1;
-             }
-          }
-          else if(grid[0][i] != -1 && grid[2][i] != -1)
-          {
-             if(grid[0][i] + grid[2][i] < grid[3][i])
-                continue;
-             else
-             {
-                boolean change = random.nextDouble() < 0.5;
-                if(change)
-                    grid[0][i] = -1;
-                else 
-                    grid[2][i] = -1;
-             }
-          }
-          else if(grid[1][i] != -1 && grid[2][i] != -1)
-          {
-             if(grid[1][i] + grid[2][i] < grid[3][i])
-                continue;
-             else
-             {
-                boolean change = random.nextDouble() < 0.5;
-                if(change)
-                    grid[1][i] = -1;
-                else 
-                    grid[2][i] = -1;
-             }
-          }    
-        }   */
-        
-        
-        int[][] grid = new int[4][10]; //10 by 4
-        Random random = new Random();
-        
-          for(int i=0; i<3; i++) //initializer
-            for(int j=0; j<10; j++) 
-                grid[i][j] = -1;
-           
-         
         long startTime = System.currentTimeMillis(), endTime = 1000000; //to prevent infinite loops
         boolean infiniteLoop = false; //infinite loops caused my a bad grid generation 
         int counter = 1;
@@ -199,24 +53,24 @@ public class Main
                 boolean exists = false;
                 for(int k=j; k>=0; k--) //checks if it exists already in row; ensures uniqueness
                 {
-                 if(num == grid[i][k])
+                 if(num == tenner[i][k].getAssignment())
                    exists = true;
                 }
                 if(i == 1) //second row diagnoal checker
                 {
                   if(j == 0)
                   {
-                   if((num == grid[0][0]) || (num == grid[0][1])) //first element
+                   if((num == tenner[0][0].getAssignment()) || (num == tenner[0][1].getAssignment())) //first element
                      exists = true;
                   }
                   else if(j == 9)
                   {  
-                   if((num == grid[0][8]) || (num == grid[0][9])) //last element  
+                   if((num == tenner[0][8].getAssignment()) || (num == tenner[0][9].getAssignment())) //last element  
                      exists = true;
                   }
                   else if (j>0 && j<9)
                   {  
-                   if((num == grid[0][j - 1]) || (num == grid[0][j]) || (num == grid[0][j + 1])) //middle elements
+                   if((num == tenner[0][j - 1].getAssignment()) || (num == tenner[0][j].getAssignment()) || (num == tenner[0][j + 1].getAssignment())) //middle elements
                      exists = true; 
                   }     
                 }      
@@ -224,32 +78,34 @@ public class Main
                 {
                  if(j == 0)
                  {
-                  if((num == grid[1][0]) || (num == grid[1][1])) //first element
+                  if((num == tenner[1][0].getAssignment()) || (num == tenner[1][1].getAssignment())) //first element
                      exists = true;
                  }
                  else if(j == 9)
                  {  
-                   if((num == grid[1][8]) || (num == grid[1][9])) //last element  
+                   if((num == tenner[1][8].getAssignment()) || (num == tenner[1][9].getAssignment())) //last element  
                      exists = true;
                  }
                   else if (j>0 && j<9) //middle elements
                   {  
-                   if((num == grid[1][j - 1]) || (num == grid[1][j]) || (num == grid[1][j + 1]))
+                   if((num == tenner[1][j - 1].getAssignment()) || (num == tenner[1][j].getAssignment()) || (num == tenner[1][j + 1].getAssignment()))
                      exists = true; 
                   }  
                 } 
                 if(exists) //violates constraints
                   j--;
                 else
-                  grid[i][j] = num; //assign to grid
+                  tenner[i][j].setAssignment(num); //assign to grid
           }
           if(infiniteLoop) //restart
              i=0;
         }
         
-           for(int i=0; i<10; i++) //sum generator
-              grid[3][i] = grid[0][i] + grid[1][i] + grid[2][i];
-          
+        for(int i=0; i<10; i++) //sum generator
+        { 
+            tenner[3][i].setAssignment(tenner[0][i].getAssignment() + tenner[1][i].getAssignment()  + tenner[2][i].getAssignment());
+            tenner[3][i].clearDomainSum();
+        }
         
         for(int i=0; i<3; i++) 
         {
@@ -257,35 +113,98 @@ public class Main
           {
              boolean result = random.nextDouble() < 0.55; //generates probability to make a cell empty
              if(result) //fill grid index
-                grid[i][j] = -1;
+                tenner[i][j].setAssignment(-1);
           }
         }
         
-        
-        
-       
+        for(int i=0; i<3; i++) //domain setters
+        {
+          for(int j=0; j<10; j++)
+          {
+             if(tenner[i][j].getAssignment() != -1) //if cell is assigned 
+                 tenner[i][j].clearDomain();
+             else //not assigned
+             {
+               tenner[i][j].removeFromDomainGreaterThan(tenner[3][j].getAssignment());
+               for(int k=0; k<10; k++) //removes from domain row elements
+                  tenner[i][j].removeFromDomain(tenner[i][k].getAssignment());
+               
+               if(i == 0 || i == 2) //first and third rows diagnoal checker
+                {
+                  if(j == 0) //first column
+                  {
+                     tenner[i][j].removeFromDomain(tenner[1][0].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[1][1].getAssignment());
+                  }
+                  else if(j == 9) //last column
+                  {  
+                     tenner[i][j].removeFromDomain(tenner[1][8].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[1][9].getAssignment());
+                  }
+                  else if (j>0 && j<9) //middle columns
+                  {  
+                     tenner[i][j].removeFromDomain(tenner[1][j-1].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[1][j].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[1][j+1].getAssignment());
+                  }     
+                }      
+                else //second row
+                {
+                 if(j == 0)
+                  {
+                     tenner[i][j].removeFromDomain(tenner[0][0].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[0][1].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[2][0].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[2][1].getAssignment());
+                  }
+                  else if(j == 9)
+                  {  
+                     tenner[i][j].removeFromDomain(tenner[0][8].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[0][9].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[2][8].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[2][9].getAssignment());
+                  }
+                  else if (j>0 && j<9)
+                  {  
+                     tenner[i][j].removeFromDomain(tenner[0][j-1].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[0][j].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[0][j+1].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[2][j-1].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[2][j].getAssignment());
+                     tenner[i][j].removeFromDomain(tenner[2][j+1].getAssignment());
+                  }
+                } 
+             }
+  
+          }
+        }
+        return tenner; 
+    }
+    
+    public static void displayTenner(Grid[][] g)
+    {
         for(int i=0; i<3; i++)
         {
             for(int j=0; j<10; j++) 
             {
-               if(grid[i][j] == -1)
-                 System.out.print(grid[i][j] + "| ");
+               if(g[i][j].getAssignment() == -1)
+                 System.out.print(g[i][j].getAssignment() + "| ");
                else
-                 System.out.print(grid[i][j] + " | ");
+                 System.out.print(g[i][j].getAssignment() + " | ");
             }
             System.out.println();
         }
         System.out.println("---------------------------------------");
         for(int i=0; i<10; i++) 
         {
-           if(grid[3][i] > 9)
-              System.out.print(grid[3][i] + "| ");
+           if(g[3][i].getAssignment() > 9)
+              System.out.print(g[3][i].getAssignment() + "| ");
            else
-              System.out.print(grid[3][i] + " | ");
+              System.out.print(g[3][i].getAssignment() + " | ");
         }
         System.out.println();
-
     }
 
 }
+
 
