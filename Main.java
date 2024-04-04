@@ -6,9 +6,15 @@ public class Main
     public static void main(String[] args) 
     {
        
-        Grid[][] tenner = generateTenner();//10 by 4
+        Grid[][] tenner = generateTennerforForwardChecking();//10 by 4
 
         displayTenner(tenner);
+        
+        System.out.println("\n");
+        
+        Grid[][] solution = forwardChecking(tenner);
+        
+        displayTenner(solution);
         
         /**for(int i=0; i<3; i++) //for testing purposes
           for(int j=0; j<10; j++)
@@ -22,7 +28,7 @@ public class Main
     
     
     
-    public static Grid[][] generateTenner()
+    public static Grid[][] generateTennerforForwardChecking()
     {
         Grid[][] tenner = new Grid[4][10]; //10 by 4
         for(int i=0; i<4; i++) 
@@ -115,17 +121,18 @@ public class Main
              if(result) //fill grid index
                 tenner[i][j].setAssignment(-1);
           }
-        }
+        } 
         
         for(int i=0; i<3; i++) //domain setters
         {
           for(int j=0; j<10; j++)
           {
              if(tenner[i][j].getAssignment() != -1) //if cell is assigned 
-                 tenner[i][j].clearDomain();
+                tenner[i][j].clearDomain();
              else //not assigned
              {
                tenner[i][j].removeFromDomainGreaterThan(tenner[3][j].getAssignment());
+               
                for(int k=0; k<10; k++) //removes from domain row elements
                   tenner[i][j].removeFromDomain(tenner[i][k].getAssignment());
                
@@ -181,6 +188,7 @@ public class Main
         return tenner; 
     }
     
+    
     public static void displayTenner(Grid[][] g)
     {
         for(int i=0; i<3; i++)
@@ -204,38 +212,132 @@ public class Main
         }
         System.out.println();
     }
+    
+    
+    public static boolean complete(Grid[][] g)
+    {
+       for(int i=0; i<3; i++) //removes the sum and all bigger numbers from the domains of its column 
+       {
+           for(int j=0; j<10; j++)
+           { 
+               if(g[i][j].getAssignment() == -1)
+                   return false;
+           }
+       } 
+       return true;
+    }
+    
+    
+    public static boolean checkDomains(Grid[][] g)
+    {
+      for(int i=0; i<3; i++) 
+       {
+           for(int j=0; j<10; j++)
+           { 
+               if(g[i][j].getAssignment() == -1 && g[i][j].domainIsEmpty())
+                   return false;
+           }
+       } 
+       return true;   
+    }
+          
+   /** public static boolean satisfiesConstraints(Grid[][] grid, int row, int column, int assignment)
+    {
+       Grid[][] newAssignment = grid;
+       for(int i=0; i<10; i++) //removes assignment from its row's domains
+       {
+           newAssignment[row][i].removeFromDomain(assignment);
+           if(newAssignment[row][i].getAssignment() == -1 && newAssignment[row][i].domainIsEmpty()) //inconsistency
+               return false;
+       } 
+       if(row == 0 || row == 2) //removes assignment from adjacent cells' domain
+       {
+          if(column == 0) //first column
+          {
+             newAssignment[1][column].removeFromDomain(assignment);
+             newAssignment[1][column + 1].removeFromDomain(assignment);
+          } 
+          else if(column == 9) //last column
+          {
+             newAssignment[1][column].removeFromDomain(assignment);
+             newAssignment[1][column - 1].removeFromDomain(assignment);
+          }
+          else if(column > 0 && column < 9) //middle columns
+          {
+             newAssignment[1][column].removeFromDomain(assignment);
+             newAssignment[1][column - 1].removeFromDomain(assignment);
+             newAssignment[1][column + 1].removeFromDomain(assignment);
+          }
+       } 
+       else //second row
+       {
+          if(column == 0) //first column
+          {
+             newAssignment[0][column].removeFromDomain(assignment);
+             newAssignment[0][column + 1].removeFromDomain(assignment);
+             newAssignment[2][column].removeFromDomain(assignment);
+             newAssignment[2][column + 1].removeFromDomain(assignment);
+          }
+          else if(column == 9) //last column
+          {
+             newAssignment[0][column].removeFromDomain(assignment);
+             newAssignment[0][column - 1].removeFromDomain(assignment);
+             newAssignment[2][column].removeFromDomain(assignment);
+             newAssignment[2][column - 1].removeFromDomain(assignment);
+          } 
+          else if(column > 0 && column < 9) //middle columns
+          {
+             newAssignment[0][column].removeFromDomain(assignment);
+             newAssignment[0][column - 1].removeFromDomain(assignment);
+             newAssignment[0][column + 1].removeFromDomain(assignment);
+             newAssignment[2][column].removeFromDomain(assignment);
+             newAssignment[2][column - 1].removeFromDomain(assignment);
+             newAssignment[2][column + 1].removeFromDomain(assignment);
+          }
+       }
+       if(!checkDomains(newAssignment))
+           return false;    
+          
+      /** if(row == 0 && newAssignment[1][column].getAssignment() != -1 && newAssignment[2][column].getAssignment() != -1)
+          if((assignment + newAssignment[1][column].getAssignment() + newAssignment[2][column].getAssignment()) != newAssignment[3][column].getAssignment()) 
+              return false;
+            
+       if(row == 2 && newAssignment[1][column].getAssignment() != -1 && newAssignment[0][column].getAssignment() != -1)
+          if((assignment + newAssignment[1][column].getAssignment() + newAssignment[0][column].getAssignment()) != newAssignment[3][column].getAssignment()) 
+              return false;
+            
+       if(row == 1 && newAssignment[0][column].getAssignment() != -1 && newAssignment[2][column].getAssignment() != -1)
+          if((assignment + newAssignment[0][column].getAssignment() + newAssignment[2][column].getAssignment()) != newAssignment[3][column].getAssignment()) 
+              return false;
+     // grid = newAssignment;
+      return true;       
+    }*/
+    
 
-     public static void forwardChecking(Grid[][] grid)
+   /** public static void forwardChecking(Grid[][] grid)
     {
         boolean failed = false;
-        for(int j=0; j<10; j++) //removes the sum and all bigger numbers from the domains of its column 
-        {
-            for(int i=0; i<3; i++)
-            {
-                grid[i][j].removeFromDomain(grid[3][j].getAssignment());
-                grid[i][j].removeFromDomainGreaterThan(grid[3][j].getAssignment());
-            }
 
-        }
         for (int i=0; i<3; i++) 
         {
             for (int j=0; j<10; j++) 
             {
-                if(grid[i][j].getAssignment()==-1) //if not assigned
+                if(grid[i][j].getAssignment() == -1) //if not assigned
                     grid[i][j].setAssignment(grid[i][j].selectRandomFromDomain()); //assigns randomly from domain
               
                 int current = grid[i][j].getAssignment();
+                
                 if(j<9)
                 {
-                    for (int k = 9; k > j+1; k--) //removes assignment from its row's domains
+                    for (int k=9; k>j+1; k--) //removes assignment from its row's domains
                     {
                         grid[i][k].removeFromDomain(current);
                         if(grid[i][k].domainIsEmpty())
                         {
-                         grid[i][j].removeFromDomain(current);
-                         grid[i][k].addToDomain(current);
-                         failed = true;
-                         break;
+                          grid[i][j].removeFromDomain(current);
+                          grid[i][k].addToDomain(current);
+                          failed = true;
+                          break;
                         }
                     }
                     if(failed)
@@ -249,45 +351,45 @@ public class Main
                         grid[i][j+1].removeFromDomain(current);
                         if(grid[i][j+1].domainIsEmpty())//forward checking
                         {
-                         grid[i][j].removeFromDomain(current);
-                         grid[i][j+1].addToDomain(current);
-                         failed = true;
-                         j--;
-                         continue;
+                          grid[i][j].removeFromDomain(current);
+                          grid[i][j+1].addToDomain(current);
+                          failed = true;
+                          j--;
+                          continue;
                         }
 
-                     /* if (grid[i][j+1].getAssignment()==-1) 
-                            grid[i][j+1].removeFromDomain(current); ? */
+                     // if (grid[i][j+1].getAssignment()==-1) 
+                         //   grid[i][j+1].removeFromDomain(current); ? 
                         grid[i+1][j].removeFromDomain(current);
                         if(grid[i+1][j].domainIsEmpty())
                         {
-                         grid[i][j].removeFromDomain(current);
-                         grid[i+1][j].addToDomain(current);
-                         failed = true;
-                         j--;
-                         continue;
+                          grid[i][j].removeFromDomain(current);
+                          grid[i+1][j].addToDomain(current);
+                          failed = true;
+                          j--;
+                          continue;
                         }
                         grid[i+1][j+1].removeFromDomain(current);
-                         if(grid[i+1][j+1].domainIsEmpty())
+                        if(grid[i+1][j+1].domainIsEmpty())
                         {
-                         grid[i][j].removeFromDomain(current);
-                         grid[i+1][j+1].addToDomain(current);
-                         failed = true;
-                         j--;
-                         continue;
+                          grid[i][j].removeFromDomain(current);
+                          grid[i+1][j+1].addToDomain(current);
+                          failed = true;
+                          j--;
+                          continue;
                         }
 
                     }
                     else if(i==2) //removes assignment from adjacent cells' domain for row 3
                     {
                         grid[i][j+1].removeFromDomain(current);
-                         if(grid[i][j+1].domainIsEmpty())
+                        if(grid[i][j+1].domainIsEmpty())
                         {
-                         grid[i][j].removeFromDomain(current);
-                         grid[i][j+1].addToDomain(current);
-                         failed = true;
-                         j--;
-                         continue;
+                          grid[i][j].removeFromDomain(current);
+                          grid[i][j+1].addToDomain(current);
+                          failed = true;
+                          j--;
+                          continue;
                         }
 
                     }
@@ -296,28 +398,225 @@ public class Main
                     grid[i+1][j].removeFromDomain(current);
                     if(grid[i+1][j].domainIsEmpty())
                     {
-                     grid[i][j].removeFromDomain(current);
-                     grid[i+1][j].addToDomain(current);
-                     failed = true;
-                     j--;
-                     continue;
+                      grid[i][j].removeFromDomain(current);
+                      grid[i+1][j].addToDomain(current);
+                      failed = true;
+                      j--;
+                      continue;
                     }
+                    
 
             }// end for loop j
         }//end for loop i
 
-    }//end forward checking
-
-    /*public static void forwardCheck(Grid cell, Grid nextCell, int num)
-    {
-        if(nextCell.domainIsEmpty())
+    }  */
+    
+    
+  public static Grid[][] forwardChecking(Grid[][] grid) //kind of works most of the time; gets stuck sometimes
+  {      
+     Random random = new Random();
+     int row, column;
+     Grid[][] current = copyGrid(grid), newAssignment;
+     Stack<Grid[][]> s = new Stack();
+     s.push(grid);
+     boolean backtrack = false, checker = false;
+     
+     while(!complete(current)) 
+     {
+        current = copyGrid(s.peek());
+        backtrack = false;
+        checker = false;
+        
+        do 
         {
-         cell.removeFromDomain(num);
-         nextCell.addToDomain(num);
-        }
+           row = random.nextInt(3);
+           column = random.nextInt(10);
+        }while(current[row][column].getAssignment() != -1 && !complete(current));
+        //System.out.println("outer");
+        do
+        {
+          current[row][column].setAssignment(-1);
+          if(current[row][column].domainIsEmpty())
+          {  
+            backtrack = true;
+            //checker = true;
+            break;
+          }
+           //System.out.println("inner");
+          int assignment = current[row][column].selectRandomFromDomain();
+          current[row][column].setAssignment(assignment);
+          current[row][column].removeFromDomain(assignment);
+           
+          newAssignment = copyGrid(current); 
+         
+          for(int i=0; i<10; i++) //removes assignment from its row's domains
+          {
+             newAssignment[row][i].removeFromDomain(assignment);
+             //if(newAssignment[row][i].domainIsEmpty()) //inconsistency
+                //checker = true;
+          } 
+          
+          if(row == 0 || row == 2) //removes assignment from adjacent cells' domain
+          {
+             if(column == 0) //first column
+             { 
+               newAssignment[1][column].removeFromDomain(assignment);
+               newAssignment[1][column + 1].removeFromDomain(assignment);
+             } 
+             else if(column == 9) //last column
+             { 
+               newAssignment[1][column].removeFromDomain(assignment);
+               newAssignment[1][column - 1].removeFromDomain(assignment);
+             }
+             else if(column > 0 && column < 9) //middle columns
+             {
+               newAssignment[1][column].removeFromDomain(assignment);
+               newAssignment[1][column - 1].removeFromDomain(assignment);
+               newAssignment[1][column + 1].removeFromDomain(assignment);
+             }
+          } 
+          else //second row
+          {
+             if(column == 0) //first column
+             {
+               newAssignment[0][column].removeFromDomain(assignment);
+               newAssignment[0][column + 1].removeFromDomain(assignment);
+               newAssignment[2][column].removeFromDomain(assignment);
+               newAssignment[2][column + 1].removeFromDomain(assignment);
+             }
+             else if(column == 9) //last column
+             {
+               newAssignment[0][column].removeFromDomain(assignment);
+               newAssignment[0][column - 1].removeFromDomain(assignment);
+               newAssignment[2][column].removeFromDomain(assignment);
+               newAssignment[2][column - 1].removeFromDomain(assignment);
+             } 
+             else if(column > 0 && column < 9) //middle columns
+             { 
+               newAssignment[0][column].removeFromDomain(assignment);
+               newAssignment[0][column - 1].removeFromDomain(assignment);
+               newAssignment[0][column + 1].removeFromDomain(assignment);
+               newAssignment[2][column].removeFromDomain(assignment);
+               newAssignment[2][column - 1].removeFromDomain(assignment);
+               newAssignment[2][column + 1].removeFromDomain(assignment);
+             }
+          }
+              
+       if(row == 0)
+       {  
+          if(newAssignment[1][column].getAssignment() != -1 && newAssignment[2][column].getAssignment() != -1)
+          { 
+            if((assignment + newAssignment[1][column].getAssignment() + newAssignment[2][column].getAssignment()) != newAssignment[3][column].getAssignment()) 
+                checker = true;
+          }
+          else if(newAssignment[1][column].getAssignment() != -1)
+          {
+             if((assignment + newAssignment[1][column].getAssignment()) > newAssignment[3][column].getAssignment()) 
+                 checker = true;
+             else
+                 newAssignment[2][column].removeFromDomainGreaterThan(assignment + newAssignment[1][column].getAssignment());
+          }
+          else if(newAssignment[2][column].getAssignment() != -1)
+          {
+             if((assignment + newAssignment[2][column].getAssignment()) > newAssignment[3][column].getAssignment()) 
+                 checker = true;
+             else
+                newAssignment[1][column].removeFromDomainGreaterThan(assignment + newAssignment[2][column].getAssignment());
+          }
+       }
+       
+       if(row == 1)
+       {  
+          if(newAssignment[0][column].getAssignment() != -1 && newAssignment[2][column].getAssignment() != -1)
+          { 
+            if((assignment + newAssignment[0][column].getAssignment() + newAssignment[2][column].getAssignment()) != newAssignment[3][column].getAssignment()) 
+                checker = true;
+          }
+          else if(newAssignment[0][column].getAssignment() != -1)
+          {
+             if((assignment + newAssignment[0][column].getAssignment()) > newAssignment[3][column].getAssignment()) 
+                 checker = true;
+             else
+                 newAssignment[2][column].removeFromDomainGreaterThan(assignment + newAssignment[0][column].getAssignment());
+          }
+          else if(newAssignment[2][column].getAssignment() != -1)
+          {
+             if((assignment + newAssignment[2][column].getAssignment()) > newAssignment[3][column].getAssignment()) 
+                 checker = true;
+             else  
+                 newAssignment[0][column].removeFromDomainGreaterThan(assignment + newAssignment[2][column].getAssignment());
+          }
+       }
+       
+       if(row == 2)
+       {  
+          if(newAssignment[1][column].getAssignment() != -1 && newAssignment[0][column].getAssignment() != -1)
+          { 
+            if((assignment + newAssignment[1][column].getAssignment() + newAssignment[0][column].getAssignment()) != newAssignment[3][column].getAssignment()) 
+                checker = true;
+          }
+          else if(newAssignment[1][column].getAssignment() != -1)
+          {
+             if((assignment + newAssignment[1][column].getAssignment()) > newAssignment[3][column].getAssignment()) 
+                 checker = true;
+              else
+                 newAssignment[0][column].removeFromDomainGreaterThan(assignment + newAssignment[1][column].getAssignment());
+          }
+          else if(newAssignment[0][column].getAssignment() != -1)
+          {
+             if((assignment + newAssignment[0][column].getAssignment()) > newAssignment[3][column].getAssignment()) 
+                checker = true;
+             else
+                 newAssignment[1][column].removeFromDomainGreaterThan(assignment + newAssignment[0][column].getAssignment());
+          }
+       }
+       
+           if(!checkDomains(newAssignment))
+              checker = true; 
+       
+           if(checker)
+           { 
+               //checker = false;
+               continue;
+           
+           }
+           else
+           {   
+             newAssignment[row][column].clearDomain();
+             s.push(newAssignment);
+             break;
+           }
+         }while(true);
+       
+         if(backtrack)
+         {
+             s.pop(); 
+             if(s.empty())
+                s.push(grid);
+           
+         } 
+     }
+ 
+     return current; 
+  }      
+  
+ 
+   public static Grid[][] copyGrid(Grid[][] original) 
+   {
+     int rows = 4;
+     int cols = 10;
+     Grid[][] copy = new Grid[rows][cols];
 
-    }*/
+     for(int i = 0; i < rows; i++)
+        for(int j = 0; j < cols; j++) 
+            copy[i][j] = new Grid(original[i][j]);
+     
+     return copy;
+   }
 
-}
+ }
+ 
+ 
+ 
 
 
