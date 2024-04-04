@@ -9,7 +9,18 @@ public class Grid
     {
        assignment = -1;  
     }
+    
+    public Grid(Grid g) //copy constructor
+    {
+        this.assignment = g.assignment;
+        System.arraycopy(g.domain, 0, this.domain, 0, 10);
+    }
 
+    public int[] getDomain() 
+    {
+        return domain;
+    }
+    
     public int getAssignment()
     {
         return assignment;
@@ -23,10 +34,7 @@ public class Grid
     public void clearDomain()
     {
         for(int i=0; i<10; i++)
-        {
-          if(domain[i] != assignment)
-             domain[i] = -1;
-        }
+           domain[i] = -1;
     }
     
    public void clearDomainSum()
@@ -38,7 +46,7 @@ public class Grid
     public void removeFromDomain(int index)       
     {
         if(index != -1)
-        domain[index] = -1;
+          domain[index] = -1;
     }
     
     public void removeFromDomainGreaterThan(int index)
@@ -59,31 +67,30 @@ public class Grid
     public int selectRandomFromDomain()
     {
         Random random = new Random();
-        return domain[random.nextInt(domain.length)]; //returns a random number form domain using a random index
+        int num = -1;
+        if(assignment == -1)
+          while((num = domain[random.nextInt(10)]) == -1);
+        return num; //returns a random number form domain using a random index
 
     }
 
     public boolean domainIsEmpty()
     {
-        boolean empty = false;
-        for (int i=0; i<domain.length; i++) 
+        if(assignment != -1)
+           return false;
+        
+        for(int i=0; i<domain.length; i++) 
         {
-            if (domain[i]!=-1) 
-                return false;
+            if(domain[i] != -1) 
+               return false;
         }
         return true;
     }
 
     public void addToDomain(int num)
     {
-        for (int i=0; i<domain.length; i++) 
-        {
-            if (domain[i]=-1)
-            {
-                domain[i]=num;
-                break;
-            }
-        }
+       if(domain[num] == -1)
+          domain[num] = num; 
     }
     
 }
