@@ -639,41 +639,43 @@ public class Main
   public static Grid[][] forwardCheckingMRV(Grid[][] grid) //kind of works most of the time; gets stuck sometimes NOT ANYMORE
   {      
      Random random = new Random();
-     int row, column, consistencyChecks = 0;
+     int row = 0, column = 0, consistencyChecks = 0;
      Grid[][] current = copyGrid(grid), newAssignment;
      Stack<Grid[][]> s = new Stack();
      s.push(grid);
      boolean backtrack = false, checker = false;
+     int counter = 0;
+   
      
      while(!complete(current)) 
      {
         current = copyGrid(s.peek());
         backtrack = false;
         checker = false;
-        
-     
-        int min = Integer.MAX_VALUE, minRow = -1, minColumn = -1;
-        for(int i=0; i<3; i++) //removes the sum and all bigger numbers from the domains of its column 
-        {
+         counter++;
+         int min = Integer.MAX_VALUE;
+         for(int i=0; i<3; i++) //removes the sum and all bigger numbers from the domains of its column 
+         {
            for(int j=0; j<10; j++)
            { 
                if(current[i][j].getAssignment() == -1 && current[i][j].domainSize() < min)
                {  
                    min = current[i][j].domainSize();
-                   minRow = i;
-                   minColumn = j;
+                   row = i;
+                   column = j;
                }
            }
-        } 
+         } 
         
-        row = minRow;
-        column = minColumn;
-        /**do 
+
+      if(counter > 30)
+      {
+        do 
         {
            row = random.nextInt(3);
            column = random.nextInt(10);
-        }while(current[row][column].getAssignment() != -1 && current[row][column].domainSize() == min);*/
-       
+        }while(current[row][column].getAssignment() != -1 && !complete(current));
+      }
                 
         do
         {
@@ -818,6 +820,7 @@ public class Main
            {   
              newAssignment[row][column].clearDomain();
              s.push(newAssignment);
+             counter--;
              break;
            }
            
@@ -829,6 +832,7 @@ public class Main
              s.pop(); 
              if(s.empty())
                 s.push(grid);
+             counter++;
            
          } 
      }
@@ -838,7 +842,6 @@ public class Main
   
        
 }
- 
  
  
 
