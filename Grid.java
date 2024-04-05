@@ -93,4 +93,14 @@ public class Grid
           domain[num] = num; 
     }
     
+    public int domainSize()
+    {
+        int count = 0;
+        for(int i=0; i<10; i++)
+        {
+            if(domain[i] != -1)
+                count++;
+        } 
+        return count;
+    }
 }
