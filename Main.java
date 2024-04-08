@@ -25,7 +25,24 @@ public class Main
         Grid[][] solution2 = forwardCheckingMRV(tenner);
         
         displayTenner(solution2);
+
+        //Backtracking
+        Grid[][] tenner3 = generateTennerforBacktracking();
         
+        displayTenner(tenner3);
+        
+        System.out.println();
+        
+        int num3 =unassignedVariables(tenner3);
+        
+        System.out.println("Number of unassigned variables: " + num3 +"\n");
+        
+        Grid[][] solution3= solveTennerBacktracking(tenner3);
+        
+        displayTenner(solution3);
+        
+        System.out.println();
+
        /** for(int i=0; i<3; i++) //for testing purposes
           for(int j=0; j<10; j++)
           { 
@@ -839,8 +856,165 @@ public class Main
      System.out.println("Consistency checks: " + consistencyChecks);
      return current; 
   }      
-  
-       
+
+  //Backtracking
+    public static Grid[][] generateTennerforBacktracking() {
+    Grid[][] tenner = new Grid[4][10]; // 10 by 4
+    Random random = new Random();
+    for (int i = 0; i < 4; i++)
+        for (int j = 0; j < 10; j++)
+            tenner[i][j] = new Grid();
+     
+    if (generateTennerBacktrack(tenner, 0, 0)) {
+        for (int i = 0; i < 10; i++) {
+            tenner[3][i].setAssignment(tenner[0][i].getAssignment() + tenner[1][i].getAssignment() + tenner[2][i].getAssignment());
+            tenner[3][i].clearDomainSum();
+        }
+    } else {
+        System.out.println("No solution found.");
+    }
+    
+    for(int i=0; i<3; i++) 
+        {
+          for(int j=0; j<10; j++)
+          {
+             boolean result = random.nextDouble() < 0.45; //generates probability to make a cell empty
+             if(result) //fill grid index
+                tenner[i][j].setAssignment(-1);
+          }
+        }
+        
+    return tenner;
+}
+
+private static boolean generateTennerBacktrack(Grid[][] tenner, int row, int col) {
+    if (row == 4) {
+        return true; // Grid filled successfully
+    }
+
+    int nextRow = row + (col + 1) / 10; // Move to the next row if column exceeds 9
+    int nextCol = (col + 1) % 10; // Move to the next column
+
+    if (tenner[row][col].getAssignment() != -1) {
+        // If the cell is already assigned, move to the next cell
+        if (generateTennerBacktrack(tenner, nextRow, nextCol)) {
+            return true;
+        }
+    } else {
+        // Try assigning numbers from 0 to 9
+        for (int num = 0; num < 10; num++) {
+            if (isValid(tenner, row, col, num)) {
+                tenner[row][col].setAssignment(num);
+                if (generateTennerBacktrack(tenner, nextRow, nextCol)) {
+                    return true;
+                }
+                tenner[row][col].setAssignment(-1); // Backtrack
+            }
+        }
+    }
+
+    return false; // Unable to find a valid assignment for this cell
+}
+
+private static boolean isValid(Grid[][] tenner, int row, int col, int num) {
+    // Check if num is already in the same row
+    for (int j = 0; j < 10; j++) {
+        if (tenner[row][j].getAssignment() == num) {
+            return false;
+        }
+    }
+
+    // Check if num is already in the same column
+    for (int i = 0; i < 4; i++) {
+        if (tenner[i][col].getAssignment() == num) {
+            return false;
+        }
+    }
+
+    // Check diagonal constraints
+    if (row == 1) {
+        if (col == 0) {
+            if (num == tenner[0][0].getAssignment() || num == tenner[0][1].getAssignment())
+                return false;
+        } else if (col == 9) {
+            if (num == tenner[0][8].getAssignment() || num == tenner[0][9].getAssignment())
+                return false;
+        } else {
+            if (num == tenner[0][col - 1].getAssignment() || num == tenner[0][col].getAssignment() || num == tenner[0][col + 1].getAssignment())
+                return false;
+        }
+    } else if (row == 2) {
+        if (col == 0) {
+            if (num == tenner[1][0].getAssignment() || num == tenner[1][1].getAssignment())
+                return false;
+        } else if (col == 9) {
+            if (num == tenner[1][8].getAssignment() || num == tenner[1][9].getAssignment())
+                return false;
+        } else {
+            if (num == tenner[1][col - 1].getAssignment() || num == tenner[1][col].getAssignment() || num == tenner[1][col + 1].getAssignment())
+                return false;
+        }
+    }
+
+    return true; // Valid assignment
+}
+
+public static Grid[][] solveTennerBacktracking(Grid[][] grid) {
+    int consistencyChecks = 0;
+    Grid[][] current = copyGrid(grid);
+    Stack<Grid[][]> stack = new Stack<>();
+    stack.push(grid);
+
+    while (!complete(current)) {
+        current = copyGrid(stack.peek());
+        boolean backtrack = false;
+
+        // Find the next unassigned cell
+        int[] nextCell = findUnassignedCell(current);
+        int row = nextCell[0];
+        int column = nextCell[1];
+
+        // If no unassigned cell found, puzzle is complete
+        if (row == -1 && column == -1) {
+            break;
+        }
+
+        // Try assigning numbers from 0 to 9
+        for (int num = 0; num < 10; num++) {
+            if (isValid(current, row, column, num)) {
+                current[row][column].setAssignment(num);
+                stack.push(copyGrid(current));
+                backtrack = false;
+                break;
+            }
+        }
+
+        if (backtrack) {
+            consistencyChecks++;
+            stack.pop();
+            if (stack.empty())
+                stack.push(grid);
+        }
+    }
+
+    System.out.println("Consistency checks: " + consistencyChecks);
+    return current;
+}
+
+private static int[] findUnassignedCell(Grid[][] grid) {
+    int[] cell = {-1, -1};
+    for (int i = 0; i < 4; i++) {
+        for (int j = 0; j < 10; j++) {
+            if (grid[i][j].getAssignment() == -1) {
+                cell[0] = i;
+                cell[1] = j;
+                return cell;
+            }
+        }
+    }
+    return cell;
+}
+    
 }
  
  
