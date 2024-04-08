@@ -980,17 +980,23 @@ public static Grid[][] solveTennerBacktracking(Grid[][] grid) {
         }
 
         // Try assigning numbers from 0 to 9
+        boolean assigned = false;
         for (int num = 0; num < 10; num++) {
             if (isValid(current, row, column, num)) {
                 current[row][column].setAssignment(num);
                 stack.push(copyGrid(current));
                 backtrack = false;
+                assigned = true;
                 break;
             }
         }
+        
+        if (!assigned) {
+            consistencyChecks++;
+            backtrack = true;
+        }
 
         if (backtrack) {
-            consistencyChecks++;
             stack.pop();
             if (stack.empty())
                 stack.push(grid);
