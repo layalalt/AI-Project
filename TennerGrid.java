@@ -100,21 +100,28 @@ public class TennerGrid
        
        Grid[][] tenner = generateTenner();//10 by 4
 
+       System.out.println("Initial grid:");
        displayTenner(tenner);
              
-       System.out.println();
+       
+       displayUnassignedVariables(tenner);
   
        int num = unassignedVariables(tenner);
         
-       System.out.println("Number of unassigned variables: " + num +"\n");
-                        
+       System.out.println("Number of unassigned variables: " + num +"\n\n");
+       
+       System.out.print("Backtracking: ");
        Grid[][] backtrackingSolution = backtracking(tenner);
        
        if(backtrackingSolution == null)
-          //return;
+          return;
               
        displayTenner(backtrackingSolution);
        
+       System.out.println();
+       
+       unassignedVariables2(tenner, backtrackingSolution);
+
        System.out.println();
        
        Grid[][] tenner2 = setForForwardChecking(tenner);
@@ -126,16 +133,25 @@ public class TennerGrid
             tenner2[i][j].displayDomain();
             System.out.println();
           }*/
-        
+      
+       System.out.print("\nForward Checking: ");
        Grid[][] FCSolution = forwardChecking(tenner2);
       
        displayTenner(FCSolution);
        
        System.out.println();
-      
+               
+       unassignedVariables2(tenner, FCSolution);
+
+       System.out.println();
+       
+       
+       System.out.print("\nForward Checking with MRV: ");
        Grid[][] FCMRVSolution = forwardCheckingMRV(tenner2);
         
        displayTenner(FCMRVSolution);
+       
+       System.out.println();
        
        unassignedVariables2(tenner, FCMRVSolution);
 
@@ -232,7 +248,7 @@ public class TennerGrid
         {
           for(int j=0; j<10; j++)
           {
-             boolean result = random.nextDouble() < 0.4; //generates probability to make a cell empty
+             boolean result = random.nextDouble() < 0.5; //generates probability to make a cell empty
              if(result) //empty grid index
                 tenner[i][j].assignment = -1;
              else
@@ -432,15 +448,39 @@ public class TennerGrid
    }
    
    
-   public static void unassignedVariables2(Grid[][] grid, Grid[][] solution)
+   public static void displayUnassignedVariables(Grid[][] grid)
    {
+       int counter = unassignedVariables(grid);
+       int notLast = 0;
+       System.out.print("Grid variables: ");
        for(int i=0; i<3; i++)
        {
            for(int j=0; j<10; j++)
            { 
                if(grid[i][j].assignment == -1)
                {  
-                 System.out.print("grid[" + i + "][" + j + "] = " + solution[i][j].assignment + "  ");
+                 notLast++;
+                 if(notLast != counter)
+                   System.out.print("grid[" + i + "][" + j + "], ");
+                 else
+                   System.out.print("grid[" + i + "][" + j + "] ");
+               }
+           }
+       }
+       System.out.println();
+   }
+   
+   
+   public static void unassignedVariables2(Grid[][] grid, Grid[][] solution)
+   {
+       System.out.print("Final grid assignments: ");
+       for(int i=0; i<3; i++)
+       {
+           for(int j=0; j<10; j++)
+           { 
+               if(grid[i][j].assignment == -1)
+               {  
+                 System.out.print("grid[" + i + "][" + j + "]=" + solution[i][j].assignment + "  ");
                }
            }
        }
@@ -490,7 +530,7 @@ public class TennerGrid
      long startTime = System.currentTimeMillis(), endTime = Integer.MAX_VALUE; //to prevent infinite loops
      counter = 0;
 
-     while(!complete(current)) 
+     while(!complete(current) || checker) 
      {
         checker = false;
         consistencyChecks++;
@@ -498,7 +538,7 @@ public class TennerGrid
         column = dim[1][counter];
         
         endTime = System.currentTimeMillis();
-        if((endTime - startTime)/1000.0 > 4) //loop took more that a 0.1 seconds; stuck
+        if((endTime - startTime)/1000.0 > 10) //loop took more that a 0.1 seconds; stuck
         {    
             System.out.println("Generated grid is unsolvable.");
             noSolution = true;  
@@ -512,11 +552,12 @@ public class TennerGrid
            if(counter < states.size())
               current = copyGrid(states.remove(counter--));
 
-           if(counter < 0 || counter == states.size()) 
+           if(counter == 0 || counter == states.size()) 
            {
               current = copyGrid(grid);
               states.clear();
               counter = 0;
+              checker = false;
               consistencyChecks--;
               break;
             }
@@ -532,34 +573,33 @@ public class TennerGrid
         current[row][column].assignment = assignment;
         current[row][column].removeFromDomain(assignment);
         newAssignment = copyGrid(current);
-        
+                
         for(int i=0; i<10; i++) //removes assignment from its row's domains
         {
-           if(newAssignment[row][i].assignment == assignment);
-           {  
+           if(newAssignment[row][i].assignment == assignment && i != column)           
+           {
                checker = true;
                break;
            }
+           
         }
-        if(checker)
-          continue;
-         
+
         if(row == 0 || row == 2) //removes assignment from adjacent cells' domain
         {
              if(column == 0) //first column
              { 
                if(newAssignment[1][column].assignment == assignment || newAssignment[1][column+1].assignment == assignment)
-                  continue;
+                  checker = true;
              } 
              else if(column == 9) //last column
              { 
                if(newAssignment[1][column].assignment == assignment || newAssignment[1][column-1].assignment == assignment)
-                  continue;
+                  checker = true;
              }
              else if(column > 0 && column < 9) //middle columns
              {
                 if(newAssignment[1][column].assignment == assignment || newAssignment[1][column+1].assignment == assignment || newAssignment[1][column-1].assignment == assignment)
-                   continue;
+                  checker = true;
              }
         } 
         else //second row
@@ -567,17 +607,17 @@ public class TennerGrid
              if(column == 0) //first column
              {
                if(newAssignment[0][column].assignment == assignment || newAssignment[0][column+1].assignment == assignment || newAssignment[2][column].assignment == assignment || newAssignment[2][column+1].assignment == assignment)
-                  continue;
+                  checker = true;
              }
              else if(column == 9) //last column
              {
                if(newAssignment[0][column].assignment == assignment || newAssignment[0][column-1].assignment == assignment || newAssignment[2][column].assignment == assignment || newAssignment[2][column-1].assignment == assignment)
-                  continue;
+                  checker = true;
              } 
              else if(column > 0 && column < 9) //middle columns
              { 
                if(newAssignment[0][column].assignment == assignment || newAssignment[0][column-1].assignment == assignment || newAssignment[2][column].assignment == assignment || newAssignment[2][column-1].assignment == assignment || newAssignment[0][column+1].assignment == assignment || newAssignment[2][column+1].assignment == assignment)
-                  continue;
+                  checker = true;
              }
         }
               
@@ -586,20 +626,20 @@ public class TennerGrid
           if(newAssignment[1][column].assignment != -1 && newAssignment[2][column].assignment != -1)
           { 
             if((assignment + newAssignment[1][column].assignment + newAssignment[2][column].assignment) != newAssignment[3][column].assignment) 
-                continue;
+                  checker = true;
           }
           else if(newAssignment[1][column].assignment != -1)
           {
              if((assignment + newAssignment[1][column].assignment) > newAssignment[3][column].assignment || newAssignment[3][column].assignment - (assignment + newAssignment[1][column].assignment) > 9) 
-                 continue;
+                  checker = true;
           }
           else if(newAssignment[2][column].assignment != -1)
           {
              if((assignment + newAssignment[2][column].assignment) > newAssignment[3][column].assignment || newAssignment[3][column].assignment - (assignment + newAssignment[2][column].assignment) > 9) 
-                 continue;
+                  checker = true;
           }
           else if(assignment > newAssignment[3][column].assignment)
-              continue;
+                  checker = true;
         }
        
         if(row == 1)
@@ -607,20 +647,20 @@ public class TennerGrid
           if(newAssignment[0][column].assignment != -1 && newAssignment[2][column].assignment != -1)
           { 
             if((assignment + newAssignment[0][column].assignment + newAssignment[2][column].assignment) != newAssignment[3][column].assignment) 
-                continue;
+                  checker = true;
           }
           else if(newAssignment[0][column].assignment != -1)
           {
              if((assignment + newAssignment[0][column].assignment) > newAssignment[3][column].assignment || newAssignment[3][column].assignment - (assignment + newAssignment[0][column].assignment) > 9) 
-                 continue;
+                  checker = true;
           }
           else if(newAssignment[2][column].assignment != -1)
           {
              if((assignment + newAssignment[2][column].assignment) > newAssignment[3][column].assignment || newAssignment[3][column].assignment - (assignment + newAssignment[2][column].assignment) > 9) 
-                 continue;
+                  checker = true;
           }
           else if(assignment > newAssignment[3][column].assignment)
-              continue;
+                  checker = true;
         }
        
         if(row == 2)
@@ -628,25 +668,29 @@ public class TennerGrid
           if(newAssignment[1][column].assignment != -1 && newAssignment[0][column].assignment != -1)
           { 
             if((assignment + newAssignment[1][column].assignment + newAssignment[0][column].assignment) != newAssignment[3][column].assignment) 
-                continue;
+                  checker = true;
           }
           else if(newAssignment[1][column].assignment != -1)
           {
              if((assignment + newAssignment[1][column].assignment) > newAssignment[3][column].assignment || newAssignment[3][column].assignment - (assignment + newAssignment[1][column].assignment) > 9) 
-                 continue;
+                  checker = true;
           }
           else if(newAssignment[0][column].assignment != -1)
           {
              if((assignment + newAssignment[0][column].assignment) > newAssignment[3][column].assignment || newAssignment[3][column].assignment - (assignment + newAssignment[0][column].assignment) > 9) 
-                continue;
+                  checker = true;
           }
           else if(assignment > newAssignment[3][column].assignment)
-               continue;
+                  checker = true;
         }
        
-        states.add(counter++,newAssignment);
-        current = copyGrid(newAssignment);
-        
+        if(!checker)
+        {
+            states.add(counter++,newAssignment);
+            current = copyGrid(newAssignment);
+        }
+        else 
+           continue;
      }
      
       if(noSolution)
@@ -685,7 +729,7 @@ public class TennerGrid
 
      counter = 0;
 
-     while(!complete(current)) 
+     while(!complete(current) || checker) 
      {
         consistencyChecks++;
         row = dim[0][counter];
@@ -916,7 +960,7 @@ public class TennerGrid
     
      counter = 0;
 
-     while(!complete(current)) 
+     while(!complete(current) || checker) 
      {
         consistencyChecks++;
         row = dim[0][counter];
