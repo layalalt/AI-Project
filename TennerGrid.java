@@ -2,7 +2,7 @@ import java.util.*;
 
 public class TennerGrid 
 {
-  static class Grid implements Comparable<Grid>
+  static class Grid
   {
       
     int[] domain = {0,1,2,3,4,5,6,7,8,9};
@@ -87,12 +87,7 @@ public class TennerGrid
         } 
         return count;
     }
-    
-    public int compareTo(Grid p) //for MRV sorting
-    {
-        return this.domainSize() - p.domainSize();
-    }
-     
+
   }
 
    public static void main(String[] args) 
@@ -123,11 +118,9 @@ public class TennerGrid
 
        System.out.println();
        
-       Grid[][] tenner2 = setForForwardChecking(tenner);
-
-      
+   
        System.out.print("\nForward Checking: ");
-       Grid[][] FCSolution = forwardChecking(tenner2);
+       Grid[][] FCSolution = forwardChecking(setForForwardChecking(tenner));
       
        displayTenner(FCSolution);
        
@@ -137,9 +130,9 @@ public class TennerGrid
 
        System.out.println();
        
-       
+      
        System.out.print("\nForward Checking with MRV: ");
-       Grid[][] FCMRVSolution = forwardCheckingMRV(tenner2);
+       Grid[][] FCMRVSolution = forwardCheckingMRV(setForForwardChecking(tenner));
         
        displayTenner(FCMRVSolution);
        
@@ -259,7 +252,7 @@ public class TennerGrid
           for(int j=0; j<10; j++)
           {
              if(tenner[i][j].assignment != -1) //if cell is assigned 
-               continue;
+             {}
              else //not assigned
              {
                tenner[i][j].removeFromDomainGreaterThan(tenner[3][j].assignment);
@@ -435,7 +428,6 @@ public class TennerGrid
                }
            }
        }
-       System.out.println();
        return counter;
    }
    
@@ -443,7 +435,7 @@ public class TennerGrid
    public static void displayUnassignedVariables(Grid[][] grid)
    {
        int counter = unassignedVariables(grid);
-       int notLast = 0;
+       int notLast = 0, half = counter/2;
        System.out.print("Grid variables: ");
        for(int i=0; i<3; i++)
        {
@@ -452,8 +444,10 @@ public class TennerGrid
                if(grid[i][j].assignment == -1)
                {  
                  notLast++;
-                 if(notLast != counter)
+                 if(notLast != counter && notLast != half)
                    System.out.print("grid[" + i + "][" + j + "], ");
+                 else if(notLast == half)
+                   System.out.println("grid[" + i + "][" + j + "], ");
                  else
                    System.out.print("grid[" + i + "][" + j + "] ");
                }
@@ -465,14 +459,22 @@ public class TennerGrid
    
    public static void unassignedVariables2(Grid[][] grid, Grid[][] solution)
    {
-       System.out.print("Final grid assignments: ");
+       System.out.print("Final grid assignments: \n");
+       int half = unassignedVariables(grid)/2 - 1;
+       int counter = 0;
        for(int i=0; i<3; i++)
        {
            for(int j=0; j<10; j++)
            { 
-               if(grid[i][j].assignment == -1)
+               if(grid[i][j].assignment == -1 && counter != half)
                {  
                  System.out.print("grid[" + i + "][" + j + "]=" + solution[i][j].assignment + "  ");
+                 counter++;
+               }
+               else if(grid[i][j].assignment == -1 && counter == half)
+               {
+                 System.out.println("grid[" + i + "][" + j + "]=" + solution[i][j].assignment + "  ");
+                 counter++;
                }
            }
        }
@@ -499,7 +501,6 @@ public class TennerGrid
 
      int size = unassignedVariables(grid);
      ArrayList<Grid[][]> states = new ArrayList<Grid[][]>(); //list of all the states of the grid
-     Grid[] original = new Grid[size]; //stores the original unassigned elements and their domains; helps with resetting after backtracking
      int[][] dim = new int[2][size]; //stores positions of unassigned elements
      Grid[][] current = copyGrid(grid), newAssignment = null;
      int counter = 0, consistencyChecks = 0, row = 0, column = 0;
@@ -511,7 +512,6 @@ public class TennerGrid
         {
             if(grid[i][j].assignment == -1) 
             {
-                original[counter] = new Grid(grid[i][j]);
                 dim[0][counter] = i;
                 dim[1][counter] = j;
                 counter++;
@@ -541,8 +541,7 @@ public class TennerGrid
         while(current[row][column].domainIsEmpty()) //current position has no assignment; backtrack
         {
            
-           current[row][column] = new Grid(original[counter]);
-           states.remove(--counter);
+           current = states.remove(--counter);
 
            consistencyChecks--;
            row = dim[0][counter];
@@ -679,7 +678,7 @@ public class TennerGrid
       if(noSolution) //unsolvable
          return null;
       
-      System.out.println("Consistency checks: " + consistencyChecks);
+      System.out.println("\nConsistency checks: " + consistencyChecks);
       long end = System.currentTimeMillis();
       System.out.println("Execution time: " + (end - start) + " milliseconds");
       return current;
@@ -692,7 +691,6 @@ public class TennerGrid
 
      int size = unassignedVariables(grid);
      ArrayList<Grid[][]> states = new ArrayList<Grid[][]>(); //list of all the states of the grid
-     Grid[] original = new Grid[size]; //stores the original unassigned elements and their domains; helps with resetting after backtracking
      int[][] dim = new int[2][size]; //stores positions of unassigned elements
      Grid[][] current = copyGrid(grid), newAssignment = null;
      int counter = 0, consistencyChecks = 0, row = 0, column = 0;
@@ -704,7 +702,6 @@ public class TennerGrid
         {
             if(grid[i][j].assignment == -1) 
             {
-                original[counter] = new Grid(grid[i][j]);
                 dim[0][counter] = i;
                 dim[1][counter] = j;
                 counter++;
@@ -724,8 +721,7 @@ public class TennerGrid
         while(current[row][column].domainIsEmpty()) //current position has no assignment; backtrack
         {
            
-           current[row][column] = new Grid(original[counter]);
-           states.remove(--counter);
+           current = states.remove(--counter);
            if(counter == 0) //reached "root"; restart
            {
               current = copyGrid(grid);
@@ -896,7 +892,7 @@ public class TennerGrid
            continue; //try another assignment
      }
 
-     System.out.println("Consistency checks: " + consistencyChecks);
+     System.out.println("\nConsistency checks: " + consistencyChecks);
      long end = System.currentTimeMillis();
      System.out.println("Execution time: " + (end - start) + " milliseconds");
      return current;
@@ -905,13 +901,13 @@ public class TennerGrid
    
    public static Grid[][] forwardCheckingMRV(Grid[][] grid) 
    {
- 
+
      int size = unassignedVariables(grid);
      ArrayList<Grid[][]> states = new ArrayList<Grid[][]>(); //list of all the states of the grid
-     Grid[] original = new Grid[size]; //stores the original unassigned elements and their domains; helps with resetting after backtracking
+     Grid[] vars = new Grid[size]; //stores the original unassigned elements and their domains; helps with resetting after backtracking
      int[][] dim = new int[2][size]; //stores positions of unassigned elements
      Grid[][] current = copyGrid(grid), newAssignment = null;
-     int counter = 0, consistencyChecks = 0, row = 0, column = 0;
+     int counter = 0, consistencyChecks = 0, row = 0, column = 0, index;
      boolean checker = false;
     
      for(int i=0; i<3; i++) 
@@ -920,7 +916,7 @@ public class TennerGrid
         {
             if(grid[i][j].assignment == -1) 
             {
-                original[counter] = new Grid(grid[i][j]);
+                vars[counter] = new Grid(grid[i][j]);
                 dim[0][counter] = i;
                 dim[1][counter] = j;
                 counter++;
@@ -928,40 +924,27 @@ public class TennerGrid
         }
      }
      
-     Integer[] indices = new Integer[size];
-     for(int i=0; i<size; i++) 
-        indices[i] = i;
-
-     Arrays.sort(indices, Comparator.comparingInt(i -> original[i].domainSize())); //sort indices according to the unassigned variables domain size 
-     Arrays.sort(original); //sorts unassigned elements according to their domain size
-     
-     int[][] sortedDim = new int[2][size];
-
-     for(int i=0; i<size; i++) //sorted dimensions coincide with the MRV sorting
-     {
-       sortedDim[0][i] = dim[0][indices[i]];
-       sortedDim[1][i] = dim[1][indices[i]];
-     }
-
-     dim = sortedDim; 
-    
      counter = 0;
-     
+
      long start = System.currentTimeMillis();
      while(!complete(current) || checker) 
      {
         consistencyChecks++;
-        row = dim[0][counter];
-        column = dim[1][counter];
+        index = MRV(vars); //MRV variable's index
+        row = dim[0][index];
+        column = dim[1][index];
         
         while(current[row][column].domainIsEmpty()) //current position has no assignment; backtrack
         {
            
-           current[row][column] = new Grid(original[counter]);
-           states.remove(--counter);
+           current = states.remove(--counter);
+           index = MRV(vars);
+           row = dim[0][index];
+           column = dim[1][index];
            if(counter == 0) //reached "root"; restart
            {
               current = copyGrid(grid);
+              vars = updateDomains(vars, current, dim);
               states.clear();
               counter = 0;
               checker = false;
@@ -969,12 +952,11 @@ public class TennerGrid
               break;
             }
             consistencyChecks--;
-            row = dim[0][counter];
-            column = dim[1][counter];
         }
 
-        row = dim[0][counter];
-        column = dim[1][counter];
+        index = MRV(vars);
+        row = dim[0][index];
+        column = dim[1][index];
 
         int assignment = current[row][column].selectRandomFromDomain();
         current[row][column].assignment = assignment;
@@ -1117,22 +1099,50 @@ public class TennerGrid
              newAssignment[0][column].removeFromDomainGreaterThan(newAssignment[3][column].assignment - assignment);
           } 
         }
-        if(!checkDomains(newAssignment))
+        if(!checkDomains(newAssignment)) //if any unassigned element's domain is empty
            checker = true;
         
         if(!checker) //assignment doesn't violate any constraints
         {
             states.add(counter++,newAssignment); //add it to list
             current = copyGrid(newAssignment);
+            vars = updateDomains(vars, current, dim);
         }
         else 
            continue; //try another assignment
      }
 
-     System.out.println("Consistency checks: " + consistencyChecks);
+     System.out.println("\nConsistency checks: " + consistencyChecks);
      long end = System.currentTimeMillis();
      System.out.println("Execution time: " + (end - start) + " milliseconds");
      return current;
    }
-
+    
+   public static int MRV(Grid[] unAssigned) //finds the minimum remaining valued variable
+   {
+       int min = Integer.MAX_VALUE;
+       int index = 0;
+       for(int i=0; i<unAssigned.length; i++) 
+       {
+            
+          if(unAssigned[i].domainSize() < min && unAssigned[i].assignment == -1)
+          {
+              min = unAssigned[i].domainSize();
+              index = i;
+          }    
+       }
+       return index;
+   }
+   
+   public static Grid[] updateDomains(Grid[] unAssigned, Grid[][] grid, int[][] dim)
+   {
+      int row, column;
+      for(int i=0; i<unAssigned.length; i++) 
+      {
+        row = dim[0][i];
+        column = dim[1][i];
+        unAssigned[i] = new Grid(grid[row][column]);
+      }
+      return unAssigned;
+   }
 }
