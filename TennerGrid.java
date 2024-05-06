@@ -19,11 +19,6 @@ public class TennerGrid
         System.arraycopy(g.domain, 0, this.domain, 0, 10);
     }
 
-    public int[] getDomain() 
-    {
-        return domain;
-    }
-
     public void clearDomain()
     {
         for(int i=0; i<10; i++)
@@ -904,7 +899,7 @@ public class TennerGrid
 
      int size = unassignedVariables(grid);
      ArrayList<Grid[][]> states = new ArrayList<Grid[][]>(); //list of all the states of the grid
-     Grid[] vars = new Grid[size]; //stores the original unassigned elements and their domains; helps with resetting after backtracking
+     Grid[] vars = new Grid[size]; //stores the unassigned elements and their domains
      int[][] dim = new int[2][size]; //stores positions of unassigned elements
      Grid[][] current = copyGrid(grid), newAssignment = null;
      int counter = 0, consistencyChecks = 0, row = 0, column = 0, index;
@@ -1106,7 +1101,7 @@ public class TennerGrid
         {
             states.add(counter++,newAssignment); //add it to list
             current = copyGrid(newAssignment);
-            vars = updateDomains(vars, current, dim);
+            vars = updateDomains(vars, current, dim); //update vars domain to ensure proper MRV selection
         }
         else 
            continue; //try another assignment
@@ -1134,7 +1129,7 @@ public class TennerGrid
        return index;
    }
    
-   public static Grid[] updateDomains(Grid[] unAssigned, Grid[][] grid, int[][] dim)
+   public static Grid[] updateDomains(Grid[] unAssigned, Grid[][] grid, int[][] dim) //updates domains of MRV's array
    {
       int row, column;
       for(int i=0; i<unAssigned.length; i++) 
